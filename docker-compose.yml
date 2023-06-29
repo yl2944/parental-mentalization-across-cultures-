@@ -4,8 +4,8 @@ services:
     build:
       dockerfile: docker/Dockerfile
       context: .
-    container_name: yl2944/parental-mentalization-across-cultures-:knit
-    image: yl2944/parental-mentalization-across-cultures-:knit
+    container_name: yl2944/parental-mentalization-across-cultures:knit
+    image: yl2944/parental-mentalization-across-cultures:knit
     volumes:
       - .:/home/rstudio
     environment:
