@@ -17,14 +17,21 @@ csl: apa-6th-edition.csl
 
 ```{r setup, include=FALSE}
 
+#Install required packages
+packagelist <- c('tidyverse','pwr','tidyselect','dplyr','ggplot2','ggpubr','RColorBrewer', 'car', 'BayesFactor', 'kableExtra') # list of CRAN packages
+missingpackages <- packagelist[!packagelist %in% installed.packages()[,1]]
+if (length(missingpackages)>0){install.packages(missingpackages)}
+toinstall <- packagelist[which(!packagelist %in% (.packages()))]
+invisible(lapply(toinstall,library,character.only=TRUE))
+
 knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-```{r analysis, include=FALSE}
+```{r data, include=FALSE}
 
+#Read in full CSV and split into GB and KO subframes
 data <- read.csv('ParentalMentalization.csv')
-
 GB <- subset(data,Nation==1)
 KO <- subset(data,Nation==2)
 
@@ -32,7 +39,7 @@ KO <- subset(data,Nation==2)
 
 # Abstract {.unnumbered}
 
-Differences in mind-mindedness and Parental Reflective Functioning (PRF) were investigated in mothers and their 6-month-old infants from South Korea (N=66, 32 girls) and the United Kingdom (N=63, 26 girls). Mind-mindedness was assessed in terms of appropriate and non-attuned mind-related comments during infant–mother interaction; PRF was assessed using a questionnaire. British mothers commented more on infant desires and preferences, whereas Korean mothers commented more on cognitions and emotions, but there were no cultural differences in overall levels of mind-mindedness. For PRF, Korean mothers reported more certainty about their infants’ mental states compared with their British counterparts, but there were no cultural differences in mothers’ reported interest in their infants’ mental states. Greater reported certainty about infants’ mental states was positively related to self-reported parenting quality in both cultural groups, but this association was not seen for parenting quality as assessed observationally. Mind-mindedness and PRF were unrelated in both Korean and British mothers. Results are discussed in terms of the Korean concept of mother–-infant *oneness* and the multi-dimensional nature of parental mentalization. 
+Differences in mind-mindedness and Parental Reflective Functioning (PRF) were investigated in mothers and their 6-month-old infants from South Korea (N=`r round(length(KO$Mum_Age_decimals), digits = 0)`, `r sum(KO$Baby_Gender == 2)` girls) and the United Kingdom (N=`r round(length(GB$Mum_Age_decimals), digits = 0)`, `r sum(GB$Baby_Gender == 2)` girls). Mind-mindedness was assessed in terms of appropriate and non-attuned mind-related comments during infant–mother interaction; PRF was assessed using a questionnaire. British mothers commented more on infant desires and preferences, whereas Korean mothers commented more on cognitions and emotions, but there were no cultural differences in overall levels of mind-mindedness. For PRF, Korean mothers reported more certainty about their infants’ mental states compared with their British counterparts, but there were no cultural differences in mothers’ reported interest in their infants’ mental states. Greater reported certainty about infants’ mental states was positively related to self-reported parenting quality in both cultural groups, but this association was not seen for parenting quality as assessed observationally. Mind-mindedness and PRF were unrelated in both Korean and British mothers. Results are discussed in terms of the Korean concept of mother–-infant *oneness* and the multi-dimensional nature of parental mentalization. 
 
 *Keywords*: Cultural differences, Maternal mind-mindedness, Parental Reflective Functioning, Parenting, Maternal well-being  
 
@@ -60,7 +67,7 @@ The main aim of the present study was to investigate cultural differences in min
 
 How might traditional Korean parenting practices relate to mind-mindedness? We hypothesized that Korean mothers would produce more appropriate mind-related comments compared with British mothers because the Korean parenting context emphasizes interconnectedness between parents and children. However, as this cultural expectation for mothers and infants to be ‘at one’ may escalate the risk of mothers’ projection of their own thoughts and feelings onto their infants, it may also result in Korean mothers being more likely than their British counterparts to make non-attuned mind-related comments. Previous research shows that appropriate and non-attuned mind-related comments are unrelated [e.g., @Meins2012; @Meins2002] and should not be considered to represent opposite poles of a unidimesional construct. Some caregivers thus score highly for both appropriate and non-attuned mind-related comments [@Meins2012], and this pattern may be more typical in Korean mothers, given the cultural emphasis on oneness. Moreover, we expected cultural differences to emerge in the types of internal states that mothers attributed to their infants. As Korean mothers’ beliefs and goals focus on building relational closeness and achieving oneness with their children [@Park2006], a sense of knowing their infants’ thoughts and feelings might be more crucial for Korean mothers than for British mothers. Therefore, we anticipated that Korean mothers may concentrate more than their British counterparts on commenting on their infants’ emotional and cognitive states. On the other hand, the fact that British mothers rear their infants in an individualistic cultural context that emphasizes independence led us to hypothesize that comments relating to the infant’s individual preferences and desires will be more common in British mothers.
 
-The present study also investigated cross-cultural differences in PRF. @Lee2021 recently developed a Korean translation of the PRFQ. They reported that statements indicative of pre-mentalizing modes did not load onto a single factor for Korean parents, suggesting that this aspect of PRF may not generalize across cultures. They also found that parents’ certainty about their children’s mental states was positively correlated with self-reported quality of parenting, and proposed that high certainty about mental states may be normative—and deemed optimal—in Korean parents. The construct of oneness characterizes ideal parenting, for mothers in particular, as having privileged and highly accurate insight into the infant’s internal states and knowing exactly what the infant is thinking and feeling. The statements in the PRFQ that are indicative of certainty about mental states (e.g., ‘I always know what my child wants’, ‘I can completely read my child’s mind’) may thus be seen as socially desirable for Korean mothers. The study reported here was the first to investigate cross-cultural differences in PRF, assessing PRF using the PRFQ rather than an interview in order to explore Lee et al.’s proposal regarding the optimal nature of high certainty about their infants’ mental states in Korean mothers. We hypothesized that Korean mothers would achieve higher scores for certainty about mental states compared to their British counterparts. Cultural differences in the other aspects of PRF assessed by the PRFQ (pre-mentalizing modes and interest and curiosity in mental states) were investigated without specific hypotheses. The present study also included both observational and self-report measures of parenting quality to test whether high reported certainty about the infant’s mental states was related to more sensitive parenting, and whether any such relation was specific to Korean mothers.
+The present study also investigated cross-cultural differences in PRF. Lee, Meins, and Larkin [-@Lee2021] recently developed a Korean translation of the PRFQ. They reported that statements indicative of pre-mentalizing modes did not load onto a single factor for Korean parents, suggesting that this aspect of PRF may not generalize across cultures. They also found that parents’ certainty about their children’s mental states was positively correlated with self-reported quality of parenting, and proposed that high certainty about mental states may be normative—and deemed optimal—in Korean parents. The construct of oneness characterizes ideal parenting, for mothers in particular, as having privileged and highly accurate insight into the infant’s internal states and knowing exactly what the infant is thinking and feeling. The statements in the PRFQ that are indicative of certainty about mental states (e.g., ‘I always know what my child wants’, ‘I can completely read my child’s mind’) may thus be seen as socially desirable for Korean mothers. The study reported here was the first to investigate cross-cultural differences in PRF, assessing PRF using the PRFQ rather than an interview in order to explore Lee et al.’s proposal regarding the optimal nature of high certainty about their infants’ mental states in Korean mothers. We hypothesized that Korean mothers would achieve higher scores for certainty about mental states compared to their British counterparts. Cultural differences in the other aspects of PRF assessed by the PRFQ (pre-mentalizing modes and interest and curiosity in mental states) were investigated without specific hypotheses. The present study also included both observational and self-report measures of parenting quality to test whether high reported certainty about the infant’s mental states was related to more sensitive parenting, and whether any such relation was specific to Korean mothers.
 
 ## Relations between Mind-Mindedness and PRF {.unnumbered}
 
@@ -82,7 +89,16 @@ In summary, the present study sought to investigate differences between British 
 
 ## Participants {.unnumbered}
 
-Participants were British mothers (*n* = 63, *M* = 32.51 years, *SD* = 7.24 years, range 22–48 years) and their infants (37 boys, 26 girls, *M* = 6.14 months, *SD* = 1.55, range 3.50–9.40 months), and South Korean mothers (*n* = 66, *M* = 33.11 years, *SD* = 3.41 years, range 26–41 years) and their infants (34 boys, 32 girls, *M* = 7.49 months, *SD* = 1.15, range 4.23–10.63 months). In the British sample, 61 mothers were White, 1 was Mixed race, and 1 was Asian British; all mothers in the Korean sample were Asian. Regarding maternal education, most mothers had at least an undergraduate degree (British mothers: 92.1%, Korean mothers: 86.3%). All Korean mothers and 96.8% of British mothers were married or in a relationship with the infant’s father; two British mothers reported that they were not in a relationship. Both British and Korean mothers were recruited in local communities, through the Internet, and via word of mouth. 
+Participants were British mothers (*n* = `r round(length(GB$Mum_Age_decimals), digits = 0)`, *M* = `r round((sum(GB$Mum_Age_decimals, na.rm=TRUE))/ (length(GB$Mum_Age_decimals)), digits = 2)` years, *SD* = `r round(sd(GB$Mum_Age_decimals, na.rm=TRUE), digits = 2)` years, range `r floor(min(GB$Mum_Age_decimals[GB$Mum_Age_decimals > 0], na.rm=TRUE))`-`r floor(max(GB$Mum_Age_decimals, na.rm=TRUE))` years) 
+and their infants (`r sum(GB$Baby_Gender == 1)` boys, `r sum(GB$Baby_Gender == 2)` girls, *M* = `r round(mean(GB$Infant_Age_decimals, na.rm=TRUE), digits = 2)` months, *SD* = `r round(sd(GB$Infant_Age_decimals, na.rm=TRUE), digits = 2)`, range `r round(min(GB$Infant_Age_decimals, na.rm=TRUE), digits = 2)`-`r round(max(GB$Infant_Age_decimals, na.rm=TRUE), digits = 2)` months), 
+and South Korean mothers (*n* = `r round(length(KO$Mum_Age_decimals), digits = 0)`, *M* = `r round(mean(KO$Mum_Age_decimals, na.rm=TRUE), digits = 2)` years, *SD* = `r round(sd(KO$Mum_Age_decimals, na.rm=TRUE), digits = 2)` years, range `r floor(min(KO$Mum_Age_decimals, na.rm=TRUE))`–`r floor(max(KO$Mum_Age_decimals, na.rm=TRUE))` years) 
+and their infants (`r sum(KO$Baby_Gender == 1)` boys, `r sum(KO$Baby_Gender == 2)` girls, *M* = `r round(mean(KO$Infant_Age_decimals, na.rm=TRUE), digits = 2)` months, *SD* = `r round(sd(KO$Infant_Age_decimals, na.rm=TRUE), digits = 2)`, range `r round(min(KO$Infant_Age_decimals, na.rm=TRUE), digits = 2)`–`r round(max(KO$Infant_Age_decimals, na.rm=TRUE), digits = 2)` months). 
+In the British sample, `r sum(GB$Ethnic_mother == 3)` mothers were White, `r sum(GB$Ethnic_mother == 1)` was Mixed race, and `r sum(GB$Ethnic_mother == 2)` was Asian British; 
+all `r sum(KO$Ethnic_mother == 6)` mothers in the Korean sample were Asian. 
+Regarding maternal education, most mothers had at least an undergraduate degree (British mothers: `r round((sum(GB$Maternal_Education > 4) / length(GB$Maternal_Education))*100, digits = 1)`%, Korean mothers: `r round((sum(KO$Maternal_Education > 4) / length(KO$Maternal_Education))*100, digits = 1)`%). 
+`r round((sum(KO$Relationship_status < 3)/length(KO$Relationship_status))*100, digits = 1)`% of Korean mothers and `r round((sum(GB$Relationship_status < 3)/length(GB$Relationship_status))*100, digits = 1)`% of British mothers were married or in a relationship with the infant’s father; 
+`r sum(GB$Relationship_status == 3)` British mothers reported that they were not in a relationship. 
+Both British and Korean mothers were recruited in local communities, through the Internet, and via word of mouth. 
 
 ## Materials and Methods {.unnumbered}
 
@@ -120,21 +136,148 @@ The data file is available via the Open Science Framework (https://osf.io/mpn95/
 
 ## Descriptive Statistics and Preliminary Analyses {.unnumbered}
 
-Two British mothers did not answer the age question, and another British mother’s HADS and PSI-SF responses could not be used due to a technical problem. The mother with missing HADS and PSI-SF data was excluded from the main analyses on cultural differences in parental mentalization reported below. Korean infants were older than British infants, *t*(127) = 5.63, *p* < .001, and British mothers were more highly educated than Korean mothers, *t*(127) = 3.05, *p* = .003, but the groups did not differ on maternal age, *t*(125) = 0.69, *p* = .493. Infant age and maternal education were therefore included as additional covariates in the cultural differences analyses reported below. With regard to the separate categories of mind-related comments, only two mothers mentioned epistemic states and only eight mothers talked on the infant’s behalf. These categories are therefore not used in the analyses below. Table 1 shows the parenting style, mental health, and infant temperament data as a function of nationality. As shown Table 1, British mothers showed more positive parenting than did their Korean counterparts for both the self-report and observational measures. In terms of psychological well-being, Korean mothers scored more highly than British mothers for anxiety/depression and parenting distress. However, there were no significant differences between British and Korean mothers for reported or observed infant temperament and parent–child dysfunctional interaction (see Table 1).  
+```{r prelim, include=FALSE}
+
+#Replace the seemingly erroneous 0 maternal age value with an NA.
+GB['Mum_Age_decimals'][GB['Mum_Age_decimals'] == 0] <- NA
+
+#t-tests on infant age, maternal age and maternal education.
+iAge <- t.test(KO$Infant_Age_decimals, GB$Infant_Age_decimals, var.equal = TRUE)
+mAge <- t.test(GB$Mum_Age_decimals, KO$Mum_Age_decimals, var.equal = TRUE)
+mEdu <- t.test(GB$Maternal_Education, KO$Maternal_Education, var.equal = TRUE)
+
+```
+
+Two British mothers did not answer the age question, and another British mother’s HADS and PSI-SF responses could not be used due to a technical problem. The mother with missing HADS and PSI-SF data was excluded from the main analyses on cultural differences in parental mentalization reported below. 
+Korean infants were older than British infants, *t*(`r round(iAge$parameter['df'], digits = 0)`) = `r round(iAge$statistic['t'], digits = 2)`, *p* = `r format.pval(iAge$p.value, digits = 1, eps = 0.001, nsmall = 3)`,
+and British mothers were more highly educated than Korean mothers, *t*(`r round(mEdu$parameter['df'], digits = 0)`) = `r round(mEdu$statistic['t'], digits = 2)`, *p* = `r format.pval(mEdu$p.value, digits = 1, eps = 0.001, nsmall = 3)`, 
+but the groups did not differ on maternal age, *t*(`r round(mAge$parameter['df'], digits = 0)`) = `r round(mAge$statistic['t'], digits = 2)`, *p* = `r format.pval(mAge$p.value, digits = 1, eps = 0.001, nsmall = 3)`. 
+Infant age and maternal education were therefore included as additional covariates in the cultural differences analyses reported below. With regard to the separate categories of mind-related comments, only two mothers mentioned epistemic states and only eight mothers talked on the infant’s behalf. These categories are therefore not used in the analyses below. Table 1 shows the parenting style, mental health, and infant temperament data as a function of nationality. As shown Table 1, British mothers showed more positive parenting than did their Korean counterparts for both the self-report and observational measures. In terms of psychological well-being, Korean mothers scored more highly than British mothers for anxiety/depression and parenting distress. However, there were no significant differences between British and Korean mothers for reported or observed infant temperament and parent–child dysfunctional interaction (see Table 1).  
 
 ## Cultural Differences in Parental Mentalization {.unnumbered}
 
-Table 2 shows the mind-mindedness data for the UK and Korean samples. Cultural differences in appropriate and non-attuned mind-related comments were investigated using ANCOVA, with nationality added as a fixed variable and infant age, maternal education, HADS scores, the PSI-SF subscale scores (parenting distress, parent–child dysfunctional interaction, difficult child), and Lab-TAB scores added as covariates. The correlations between the variables are shown in supplemental material 1. There was no main effect of nationality for appropriate mind-related comments, *F*(8, 119) = 0.07, *p* = .790, or for non-attuned mind-related comments, *F*(8, 119) = 0.19, *p* = .668.
+```{r ANCOVAs, include=FALSE}
 
-Table 2 also shows the data for the separate categories of mind-related comments. Cultural differences in the separate categories of appropriate mind-related comments were investigated using MANCOVA, with the separate categories added as dependent variables, nationality added as a fixed variable, and infant age, maternal education, HADS scores, the PSI-SF subscale scores (parenting distress, parent–child dysfunctional interaction, difficult child), and Lab-TAB scores added as covariates. There was a main effect of nationality, *F*(4, 116) = 3.93, *p* = .005. Follow-up tests showed a main effect of nationality on appropriate comments on (a) desires and preferences, *F*(1, 119) = 11.41, p < .001, (b) cognition, *F*(1, 119) = 4.95, *p* = .028, and (c) emotion, *F*(1, 119) = 8.38, *p* = .005; there was no main effect of nationality on intention, *F*(1, 119) = 0.52, *p* = .473. British mothers commented more frequently in appropriate ways on their infants’ desires and preferences than did Korean mothers, but Korean mothers made more appropriate mind-related comments about their infants’ cognitive and emotional states compared with British mothers (see Table 2). 
+#Performs the ANCOVA on appropriate MR comments.
+ancAMRC <- aov(AMRC ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data)
+#Summarise appropriate ANCOVA, and correct for ANCOVAs requiring type III errors. 
+ancAMRCSummary <- Anova(ancAMRC, type="III")
 
-Cultural differences in the separate categories of non-attuned mind-related comments were investigated using MANCOVA as described above. There was a main effect of nationality, *F*(5, 115) = 4.75, p < .001. Follow-up tests showed a main effect of nationality on non-attuned comments on (a) desires and preferences, *F*(1, 119) = 6.10, *p* = .015, (b) emotion, *F*(1, 119) = 4.39, *p* = .038, and (c) physical states, *F*(1, 119) = 12.78, p < .001; there was no main effect of nationality on cognition, *F*(1, 119) = 2.47, *p* = .119, or intention, *F*(1, 119) = 0.99, *p* = .323. British mothers commented more frequently in non-attuned ways on their infants’ desires and preferences than did Korean mothers, but Korean mothers made more non-attuned mind-related comments about their infants’ emotional and physical states compared with British mothers (see Table 2). 
+#Performs the ANCOVA on non-attuned MR comments.
+ancNMRC <- aov(F_NMRC_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data)
+#Summarise non-attuned ANCOVA, and correct for ANCOVAs requiring type III errors. 
+ancNMRCSummary <- Anova(ancNMRC, type="III")
 
-The PRF data are shown in Table 2 as a function of nationality. Cultural differences in PRF were investigated using MANCOVA, with scores for *Certainty about mental states* and Interest and curiosity about mental states added as dependent variables, nationality added as a fixed variable, and infant age, maternal education, HADS scores, the PSI-SF subscale scores (parenting distress, parent–child dysfunctional interaction, difficult child), and Lab-TAB scores added as covariates. The correlations between the variables are shown in supplemental material 1. There was a main effect of nationality, *F*(2, 118) = 15.10, p < .001. Follow-up tests showed a main effect of nationality on *Certainty about mental states*, *F*(1, 119) = 26.70, p < .001, but not *Interest and curiosity in mental states*, *F*(1, 119) = 0.61, *p* = .435. As shown in Table 2, Korean mothers scored more highly than British mothers for *Certainty about mental states*.
+```
+
+```{r MANCOVAs, include=FALSE}
+
+#Groups the dependent variable columns for appropriate MR comments, non-attuned MR comments, & PRF scores. 
+depVarsAMRC <- cbind(data$AMRC_DesireandPreference_Proportion, data$AMRC_Cognition_Proportion, data$AMRC_Intention_Proportion, data$AMRC_Emotion_Proportion)
+depVarsNMRC <- cbind(data$NMRC_DesireandPreference_Proportion, data$NMRC_Cognition_Proportion, data$NMRC_Intention_Proportion, data$NMRC_Emotion_Proportion, data$NMRC_Physical_Proportion)
+depVarsPRF <- cbind(data$PRFQ_CMS, data$PRFQ_IC)
+
+#Performs a MANCOVA on the appropriate MR comments.
+mancAMRC <- manova(depVarsAMRC ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data)
+#Capture output summary of MANCOVA type III correction, converting this to lists of strings for inclusion in text. 
+co <- capture.output(Manova(mancAMRC, type="III"))
+mancAMRCSummary <- strsplit(gsub("([*]+$)|[<]", "", co[-1]), "\\s+")
+
+#Performs post-hoc ANOVAs on the appropriate MR comments individually, and corrects these to type III errors.
+phADap <- Anova(aov(AMRC_DesireandPreference_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phACog <- Anova(aov(AMRC_Cognition_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phAInt <- Anova(aov(AMRC_Intention_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phAEmo <- Anova(aov(AMRC_Emotion_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+
+#Performs a MANCOVA on the non-attuned MR comments.
+mancNMRC <- manova(depVarsNMRC ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data)
+#Capture output summary of MANCOVA type III correction, converting this to lists of strings for inclusion in text.
+co <- capture.output(Manova(mancNMRC, type="III"))
+mancNMRCSummary <- strsplit(gsub("([*]+$)|[<]", "", co[-1]), "\\s+")
+
+#Performs post-hoc ANOVAs on the non-attuned MR comments individually, and corrects these to type III errors.
+phNDap <- Anova(aov(NMRC_DesireandPreference_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phNCog <- Anova(aov(NMRC_Cognition_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phNInt <- Anova(aov(NMRC_Intention_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phNEmo <- Anova(aov(NMRC_Emotion_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phNPhy <- Anova(aov(NMRC_Physical_Proportion ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+
+#Performs a MANCOVA on the PRF scores.
+mancPRF <- manova(depVarsPRF ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data)
+#Capture output summary of MANCOVA type III correction, converting this to lists of strings for inclusion in text.
+co <- capture.output(Manova(mancPRF, type="III"))
+mancPRFSummary <- strsplit(gsub("([*]+$)|[<]", "", co[-1]), "\\s+")
+
+#Performs post-hoc ANOVAs on the PRF scores individually, and corrects these to type III errors.
+phPCms <- Anova(aov(PRFQ_CMS ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+phPIac <- Anova(aov(PRFQ_IC ~ Nation + Infant_Age_decimals + Maternal_Education + Total_HADS + LAB_TAB + PSI_PD + PSI_PCDI + PSI_DC,  data = data), type="III")
+
+```
+
+Table 2 shows the mind-mindedness data for the UK and Korean samples. Cultural differences in appropriate and non-attuned mind-related comments were investigated using ANCOVA, with nationality added as a fixed variable and infant age, maternal education, HADS scores, the PSI-SF subscale scores (parenting distress, parent–child dysfunctional interaction, difficult child), and Lab-TAB scores added as covariates. The correlations between the variables are shown in supplemental material 1. 
+There was no main effect of nationality for appropriate mind-related comments, *F*(`r round(ancAMRC$rank-1, digits = 0)`, `r round(ancAMRC$df.residual, digits = 0)`) = `r round(ancAMRCSummary$'F value'[2], digits = 2)`, *p* = `r format.pval(ancAMRCSummary$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`, 
+or for non-attuned mind-related comments, *F*(`r round(ancNMRC$rank-1, digits = 0)`, `r round(ancNMRC$df.residual, digits = 0)`) = `r round(ancNMRCSummary$'F value'[2], digits = 2)`, *p* = `r format.pval(ancNMRCSummary$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`.
+
+Table 2 also shows the data for the separate categories of mind-related comments. Cultural differences in the separate categories of appropriate mind-related comments were investigated using MANCOVA, with the separate categories added as dependent variables, nationality added as a fixed variable, and infant age, maternal education, HADS scores, the PSI-SF subscale scores (parenting distress, parent–child dysfunctional interaction, difficult child), and Lab-TAB scores added as covariates. 
+There was a main effect of nationality, *F*(`r round(as.numeric(mancAMRCSummary[[4]][5]), digits = 0)`, `r round(as.numeric(mancAMRCSummary[[4]][6]), digits = 0)`) = `r round(as.numeric(mancAMRCSummary[[4]][4]), digits = 2)`, *p* = `r format.pval(as.numeric(mancAMRCSummary[[4]][7]), digits = 1, eps = 0.001, nsmall = 3)`. 
+Follow-up tests showed a main effect of nationality on appropriate comments on (a) desires and preferences, *F*(`r round(phADap$Df[2], digits = 0)`, `r round(phADap$Df[10], digits = 0)`) = `r round(phADap$'F value'[2], digits = 2)`, *p* = `r format.pval(phADap$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`,
+(b) cognition, *F*(`r round(phACog$Df[2], digits = 0)`, `r round(phACog$Df[10], digits = 0)`) = `r round(phACog$'F value'[2], digits = 2)`, *p* = `r format.pval(phACog$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`,
+and (c) emotion, *F*(`r round(phAEmo$Df[2], digits = 0)`, `r round(phAEmo$Df[10], digits = 0)`) = `r round(phAEmo$'F value'[2], digits = 2)`, *p* = `r format.pval(phAEmo$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`;
+there was no main effect of nationality on intention, *F*(`r round(phAInt$Df[10], digits = 0)`, `r round(phAInt$Df[9], digits = 0)`) = `r round(phAInt$'F value'[2], digits = 2)`, *p* = `r format.pval(phAInt$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`.
+British mothers commented more frequently in appropriate ways on their infants’ desires and preferences than did Korean mothers, but Korean mothers made more appropriate mind-related comments about their infants’ cognitive and emotional states compared with British mothers (see Table 2). 
+
+Cultural differences in the separate categories of non-attuned mind-related comments were investigated using MANCOVA as described above. 
+There was a main effect of nationality, *F*(`r round(as.numeric(mancNMRCSummary[[4]][5]), digits = 0)`, `r round(as.numeric(mancNMRCSummary[[4]][6]), digits = 0)`) = `r round(as.numeric(mancNMRCSummary[[4]][4]), digits = 2)`, *p* = `r format.pval(as.numeric(mancNMRCSummary[[4]][7]), digits = 1, eps = 0.001, nsmall = 3)`. 
+Follow-up tests showed a main effect of nationality on non-attuned comments on (a) 
+desires and preferences, *F*(`r round(phNDap$Df[2], digits = 0)`, `r round(phNDap$Df[10], digits = 0)`) = `r round(phNDap$'F value'[2], digits = 2)`, *p* = `r format.pval(phNDap$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`, (b) 
+emotion, *F*(`r round(phNEmo$Df[2], digits = 0)`, `r round(phNEmo$Df[10], digits = 0)`) = `r round(phNEmo$'F value'[2], digits = 2)`, *p* = `r format.pval(phNEmo$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`, and (c)
+physical states, *F*(`r round(phNPhy$Df[2], digits = 0)`, `r round(phNPhy$Df[10], digits = 0)`) = `r round(phNPhy$'F value'[2], digits = 2)`, *p* = `r format.pval(phNPhy$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`;
+there was no main effect of nationality on cognition, *F*(`r round(phNCog$Df[2], digits = 0)`, `r round(phNCog$Df[10], digits = 0)`) = `r round(phNCog$'F value'[2], digits = 2)`, *p* = `r format.pval(phNCog$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`, 
+or intention, *F*(`r round(phNInt$Df[10], digits = 0)`, `r round(phNInt$Df[9], digits = 0)`) = `r round(phNInt$'F value'[2], digits = 2)`, *p* = `r format.pval(phNInt$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`. 
+British mothers commented more frequently in non-attuned ways on their infants’ desires and preferences than did Korean mothers, but Korean mothers made more non-attuned mind-related comments about their infants’ emotional and physical states compared with British mothers (see Table 2). 
+
+The PRF data are shown in Table 2 as a function of nationality. Cultural differences in PRF were investigated using MANCOVA, with scores for *Certainty about mental states* and *Interest and curiosity about mental states* added as dependent variables, nationality added as a fixed variable, and infant age, maternal education, HADS scores, the PSI-SF subscale scores (parenting distress, parent–child dysfunctional interaction, difficult child), and Lab-TAB scores added as covariates. The correlations between the variables are shown in supplemental material 1. There was a main effect of nationality, *F*(`r round(as.numeric(mancPRFSummary[[4]][5]), digits = 0)`, `r round(as.numeric(mancPRFSummary[[4]][6]), digits = 0)`) = `r round(as.numeric(mancPRFSummary[[4]][4]), digits = 2)`, *p* = `r format.pval(as.numeric(mancPRFSummary[[4]][7]), digits = 1, eps = 0.001, nsmall = 3)`. 
+Follow-up tests showed a main effect of nationality on *Certainty about mental states*, 
+*F*(`r round(phPCms$Df[2], digits = 0)`, `r round(phPCms$Df[10], digits = 0)`) = `r round(phPCms$'F value'[2], digits = 2)`, *p* = `r format.pval(phPCms$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`, but not *Interest and curiosity in mental states*, 
+*F*(`r round(phPIac$Df[2], digits = 0)`, `r round(phPIac$Df[10], digits = 0)`) = `r round(phPIac$'F value'[2], digits = 2)`, *p* = `r format.pval(phPIac$'Pr(>F)'[2], digits = 1, eps = 0.001, nsmall = 3)`. As shown in Table 2, 
+Korean mothers scored more highly than British mothers for *Certainty about mental states*.
 
 ## Relations between Parenting and Certainty about Infant Mental States {.unnumbered}
 
-Our final hypothesis related to whether mothers’ reported certainty about their infants’ mental states was related to more positive parenting, and whether any such relation was specific to Korean mothers. This hypothesis was investigated using self-reported parenting quality and an observational measure of maternal intrusiveness. Self-reported and observed parenting measures were unrelated in both Korean and British mothers. For Korean mothers, observed parenting was unrelated to reported positive parenting, *r*(64) =  .02, *p* = .858, and reported negative parenting, *r*(64) =  -.05, *p* = .709. For British mothers, observed parenting was unrelated to reported positive parenting, *r*(61) =  -.05, *p* = .700, and reported negative parenting, *r*(61) =  .14, *p* = .262. Scores for *Certainty about mental states* were (a) positively correlated with self-reported positive parenting in Korean mothers, *r*(64) = .46, p < .001, and British mothers, *r*(61) = .41, *p* = .001, and (b) negatively correlated with self-reported negative parenting in Korean mothers, *r*(64) = -.47, p < .001, and British mothers, *r*(61) = -.39, *p* = .002. In contrast, observed maternal intrusiveness was not related to *Certainty about mental states* in either Korean mothers, *r*(64) = -.13, *p* = .306, or British mothers, *r*(61) = -.19, *p* = .131.
+```{r Correlations, include=FALSE}
+
+#Performs pearson's r correlations between the the listed variables:
+
+#Observed Intrusiveness and Reported Positive Parenting.
+GB_OIPP <- cor.test(GB$corrected_intrusiveness, GB$Pos_Parenting,  method = "pearson")
+KO_OIPP <- cor.test(KO$corrected_intrusiveness, KO$Pos_Parenting,  method = "pearson")
+
+#Observed Intrusiveness and Reported Negative Parenting.
+GB_OINP <- cor.test(GB$corrected_intrusiveness, GB$Neg_Parenting,  method = "pearson")
+KO_OINP <- cor.test(KO$corrected_intrusiveness, KO$Neg_Parenting,  method = "pearson")
+
+#Certainty About Mental States and Reported Positive Parenting.
+GB_MSPP <- cor.test(GB$PRFQ_CMS, GB$Pos_Parenting, method = "pearson")
+KO_MSPP <- cor.test(KO$PRFQ_CMS, KO$Pos_Parenting, method = "pearson")
+
+#Certainty About Mental States and Reported Negative Parenting.
+GB_MSNP <- cor.test(GB$PRFQ_CMS, GB$Neg_Parenting, method = "pearson")
+KO_MSNP <- cor.test(KO$PRFQ_CMS, KO$Neg_Parenting, method = "pearson")
+
+#Observed Intrusiveness and Certainty About Mental States.
+GB_OIMS <- cor.test(GB$corrected_intrusiveness, GB$PRFQ_CMS,  method = "pearson")
+KO_OIMS <- cor.test(KO$corrected_intrusiveness, KO$PRFQ_CMS,  method = "pearson")
+
+```
+
+Our final hypothesis related to whether mothers’ reported certainty about their infants’ mental states was related to more positive parenting, and whether any such relation was specific to Korean mothers. This hypothesis was investigated using self-reported parenting quality and an observational measure of maternal intrusiveness. Self-reported and observed parenting measures were unrelated in both Korean and British mothers. 
+For Korean mothers, observed parenting was unrelated to reported positive parenting, *r*(`r round(KO_OIPP$parameter, digits = 0)`) = `r round(KO_OIPP$estimate[1], digits = 2)`, *p* = `r format.pval(KO_OIPP$p.value, digits = 1, eps = 0.001, nsmall = 3)`, and reported negative parenting,
+*r*(`r round(KO_OINP$parameter, digits = 0)`) = `r round(KO_OINP$estimate[1], digits = 2)`, *p* = `r format.pval(KO_OINP$p.value, digits = 1, eps = 0.001, nsmall = 3)`.
+For British mothers, observed parenting was unrelated to reported positive parenting, *r*(`r round(GB_OIPP$parameter, digits = 0)`) = `r round(GB_OIPP$estimate[1], digits = 2)`, *p* = `r format.pval(GB_OIPP$p.value, digits = 1, eps = 0.001, nsmall = 3)`, and reported negative parenting,
+*r*(`r round(GB_OINP$parameter, digits = 0)`) = `r round(GB_OINP$estimate[1], digits = 2)`, *p* = `r format.pval(GB_OINP$p.value, digits = 1, eps = 0.001, nsmall = 3)`.
+Scores for *Certainty about mental states* were (a) positively correlated with self-reported positive parenting in Korean mothers, *r*(`r round(KO_MSPP$parameter, digits = 0)`) = `r round(KO_MSPP$estimate[1], digits = 2)`, *p* = `r format.pval(KO_MSPP$p.value, digits = 1, eps = 0.001, nsmall = 3)`, and British mothers, *r*(`r round(GB_MSPP$parameter, digits = 0)`) = `r round(GB_MSPP$estimate[1], digits = 2)`, *p* = `r format.pval(GB_MSPP$p.value, digits = 1, eps = 0.001, nsmall = 3)`, 
+and (b) negatively correlated with self-reported negative parenting in Korean mothers, *r*(`r round(KO_MSNP$parameter, digits = 0)`) = `r round(KO_MSNP$estimate[1], digits = 2)`, *p* = `r format.pval(KO_MSNP$p.value, digits = 1, eps = 0.001, nsmall = 3)`, and British mothers, *r*(`r round(GB_MSNP$parameter, digits = 0)`) = `r round(GB_MSNP$estimate[1], digits = 2)`, *p* = `r format.pval(GB_MSNP$p.value, digits = 1, eps = 0.001, nsmall = 3)`. 
+In contrast, observed maternal intrusiveness was not related to *Certainty about mental states* in either Korean mothers, *r*(`r round(KO_OIMS$parameter, digits = 0)`) = `r round(KO_OIMS$estimate[1], digits = 2)`, *p* = `r format.pval(KO_OIMS$p.value, digits = 1, eps = 0.001, nsmall = 3)`, or British mothers, *r*(`r round(GB_OIMS$parameter, digits = 0)`) = `r round(GB_OIMS$estimate[1], digits = 2)`, *p* = `r format.pval(GB_OIMS$p.value, digits = 1, eps = 0.001, nsmall = 3)`.
 
 ## Relations between Maternal Mind-mindedness and PRF {.unnumbered}
 
@@ -160,5 +303,139 @@ Our results should be interpreted in light of certain limitations. First, the *P
 
 In future research, it would be interesting to investigate how these cultural differences in parental mentalization predict children’s later development. Certainty about the mental states of one’s infant is considered to indicate a lack of awareness of the opacity of mental states, and is thus taken to indicate lower levels of PRF and less optimal parenting in Western cultures. However, the same might not be true of cultures such as Korea. If such certainty is culturally appropriate, it may be associated with positive aspects of child development. While findings like this would appear counter-intuitive when interpreted with reference to Western parenting ideals, the same does not hold from the perspective of Korean parenting ideals. On the other hand, although maternal mind-mindedness is known to predict children’s mentalizing ability in Western countries [e.g., @Kirk2015; @Laranjo2010; @Lundy2013; @Meins2003], little is known about the link between parental mentalization and the development of children’s mentalizing skills in non-Western countries. Sensitive future research on different populations and cultures can therefore enrich our understanding of the parenting role and the many ways in which parenting relates to children’s development.
 
+\newpage
+
 # References {.unnumbered}
 
+<div id="refs"></div>
+
+\newpage
+
+# Supplementary Materials {.unnumbered}
+
+```{r table1, echo=FALSE}
+
+##Table 1##
+
+#Set up a blank dataframe with named columns.
+columns <- c(' ', 'United Kingdom M(SD)', 'South Korea M(SD)', 'Cultural Comparison', 'p')
+df1 <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
+colnames(df1) <- columns
+
+#Create list of conditions to examine, and names for these to be placed in columns (same ordered).
+conditions <- list('Total_HADS', 'PSI_PD', 'PSI_PCDI', 'PSI_DC', 'Pos_Parenting', 'Neg_Parenting', 'corrected_intrusiveness', 'LAB_TAB')
+condNames <- list('HADS', 'PSI-PD', 'PSI-CDI', 'PSI-DC', 'Positive Parenting', 'Negative Parenting', 'Observed Intrusiveness', 'Observed Infant Temp.') 
+
+#loop over conditions.
+for (val in conditions) {
+
+  #Conduct a T-test between nationalities.
+  tTest <- t.test(KO[val], GB[val], var.equal = TRUE)
+  
+  #create number & text combos to be inputted into cells (e.g. mean(SD)).
+  GBMSD <- paste0(round (tTest$estimate[2], digits = 2), " (", (round (sd(GB[[val]], na.rm=TRUE), digits = 2)), ")")
+  KOMSD <- paste0(round (tTest$estimate[1], digits = 2), " (", (round (sd(KO[[val]], na.rm=TRUE), digits = 2)), ")")
+  tTestSum <- paste0("t(",  (round(tTest$parameter['df'], digits = 0)),  ") = ", (round(tTest$statistic['t'], digits = 2)))
+
+  #insert a new row into the dataframe for each condition.                             
+  df1[nrow(df1) + 1,] <- c(val, GBMSD, KOMSD, tTestSum, format.pval(tTest$p.value, digits = 1, eps = 0.001, nsmall = 3))
+
+}
+
+#Replace conditions with modified names in the first column. 
+df1$` ` <- condNames
+
+#Format and knit dataframe as table.  
+knitr::kable(df1, booktabs = T, caption='Descriptive Statistics and Cultural Differences', align='lcccc') %>%
+  row_spec(0,bold=T) %>% 
+  kable_styling(font_size = 8, latex_options = 'HOLD_position')
+
+```
+*Note.* HADS = The Hospital Anxiety and Depression Scale; PSI-PD = Parenting Stress Index-Short Form Parenting distress subscale; PSI-CDI = Parenting Stress Index-Short Form Parent–child dysfunctional interaction subscale; PSI-DC = Parenting Stress Index-Short Form Difficult child subscale.
+
+\newpage
+
+```{r table2, echo=FALSE}
+
+##Table 2##
+
+#Set up a blank dataframe with named columns.
+columns <- c(' ', 'Mind Related Comments', 'United Kingdom M(SD)', 'South Korea M(SD)')
+df2 <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
+colnames(df2) <- columns
+
+#Create list of conditions to examine, names for these to be placed in column 2, and group names to be placed in column 1 (same ordered).
+conditions <- list('AMRC','AMRC_DesireandPreference_Proportion', 'AMRC_Cognition_Proportion', 'AMRC_Intention_Proportion', 'AMRC_Emotion_Proportion', 'F_NMRC_Proportion', 'NMRC_DesireandPreference_Proportion', 'NMRC_Cognition_Proportion', 'NMRC_Intention_Proportion', 'NMRC_Emotion_Proportion', 'NMRC_Physical_Proportion', 'PRFQ_CMS', 'PRFQ_IC')
+condNames <- list('Total AMRC', 'Desire and preferences', 'Cognition', 'Intention', 'Emotion', 'Total NMRC', 'Desire and preferences', 'Cognition', 'Intention', 'Emotion', 'Physical statement', 'CMS', 'IC')
+condGroups <- list('AMRC(proportion)','','','','','NMRC(proportion)','','','','','','PRFQ','') 
+
+#loop over conditions.
+for (val in conditions) {
+  
+  #create number & text combos to be inputted into cells (e.g. mean(SD)).
+  GBMS <- paste0((round (mean(GB[[val]], na.rm=TRUE), digits = 2)), " (", (round (sd(GB[[val]], na.rm=TRUE), digits = 2)), ")")
+  KOMS <- paste0((round (mean(KO[[val]], na.rm=TRUE), digits = 2)), " (", (round (sd(KO[[val]], na.rm=TRUE), digits = 2)), ")")
+  
+  #insert a new row into the dataframe for each condition.                           
+  df2[nrow(df2) + 1,] <- c(val, val, GBMS, KOMS)
+
+}
+
+#Replace conditions with modified groups and names in the first and second column. 
+df2$` ` <- condGroups
+df2$`Mind Related Comments` <- condNames
+
+#Format and knit dataframe as table.
+knitr::kable(df2, booktabs = T, caption='Descriptive Statistics and Cultural Differences in Parental Mentalization', align='lccc') %>%
+  row_spec(0,bold=T) %>% 
+  kable_styling(latex_options = 'HOLD_position')
+  
+```
+*Note.* AMRC = Appropriate Mind-Related Comments; NMRC = Non-attuned Mind-Related Comments; PRFQ = Parental Reflective Functioning Questionnaire; CMS = Certainty about Mental States; IC = Interest and Curiosity in Mental states.  
+
+\newpage
+
+```{r Table3prep, echo=FALSE}
+
+##Table 3##
+
+#Set up a blank dataframe with named columns.
+columns <- c(' ', '  ', "AMRC Pearson's r", 'AMRC Bayes Factor', "NMRC Pearson's r", 'NMRC Bayes Factor')
+df3 <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
+colnames(df3) <- columns
+
+#Create a list of nationalities and conditions to be correlated with Maternal mind-mindedness. Also creates names for conditions to be placed in column 2, and nationality names to be placed in column 1.
+nationalities <- list(GB, KO)
+conditions <- list('PRFQ_CMS', 'PRFQ_IC')
+condNames <- list('CMS', 'IC', 'CMS', 'IC')
+condGroups <- list('GB','','KO','') 
+
+#loop over nationalities and conditions. 
+for (nat in nationalities) {
+  for (val in conditions) {
+
+    #Performs correlational tests on data.
+    corrAMRC <- cor.test(nat[['AMRC']], nat[[val]], method=c('pearson'))
+    corrNMRC <- cor.test(nat[['F_NMRC_Proportion']], nat[[val]], method=c('pearson'))
+    
+    #Performs bayse factor analyses on data.
+    BFAMRC <- as.data.frame(correlationBF(nat[['AMRC']], nat[[val]]))
+    BFNMRC <- as.data.frame(correlationBF(nat[['F_NMRC_Proportion']], nat[[val]]))
+
+    #insert a new row into the dataframe for each condition.   
+    df3[nrow(df3) + 1,] <- c(' ', val, round(corrAMRC$estimate[1], digits = 2), round(BFAMRC$bf, digits = 2), round(corrNMRC$estimate[1], digits = 2), round(BFNMRC$bf, digits = 2))
+    
+  }
+}
+
+#Replace conditions with modified groups and names in the first and second column.
+df3$` ` <- condGroups
+df3$`  ` <- condNames
+
+#Format and knit dataframe as table.
+knitr::kable(df3, booktabs = T, caption='Associations between Maternal Mind-mindedness and the PRFQ Subscales', align='llcccc') %>%
+  row_spec(0,bold=T) %>% 
+  kable_styling(font_size = 9, latex_options = 'HOLD_position')
+  
+```
+*Note.* AMRC = Appropriate Mind-Related Comments; NMRC = Non-attuned Mind-Related Comments; CMS = Certainty about mental states; IC = Interest and curiosity in mental states. 
