@@ -419,11 +419,11 @@ for (nat in nationalities) {
     corrNMRC <- cor.test(nat[['F_NMRC_Proportion']], nat[[val]], method=c('pearson'))
     
     #Performs bayse factor analyses on data.
-    BFAMRC <- as.data.frame(correlationBF(nat[['AMRC']], nat[[val]]))
-    BFNMRC <- as.data.frame(correlationBF(nat[['F_NMRC_Proportion']], nat[[val]]))
+    BFAMRC <- as.data.frame(correlationBF(nat[['AMRC']], nat[[val]], rscale=2.055))
+    BFNMRC <- as.data.frame(correlationBF(nat[['F_NMRC_Proportion']], nat[[val]], rscale=2.055))
 
     #insert a new row into the dataframe for each condition.   
-    df3[nrow(df3) + 1,] <- c(' ', val, round(corrAMRC$estimate[1], digits = 2), round(BFAMRC$bf, digits = 2), round(corrNMRC$estimate[1], digits = 2), round(BFNMRC$bf, digits = 2))
+    df3[nrow(df3) + 1,] <- c(' ', val, round(corrAMRC$estimate[1], digits = 3), round(1/BFAMRC$bf, digits = 2), round(corrNMRC$estimate[1], digits = 2), round(1/BFNMRC$bf, digits = 2))
     
   }
 }
